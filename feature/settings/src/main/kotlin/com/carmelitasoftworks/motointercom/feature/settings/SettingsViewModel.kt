@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.carmelitasoftworks.motointercom.core.audio.AudioRoute
 import com.carmelitasoftworks.motointercom.core.audio.AudioRouter
 import com.carmelitasoftworks.motointercom.core.audio.MicLoopback
+import com.carmelitasoftworks.motointercom.core.audio.SoundSettings
+import com.carmelitasoftworks.motointercom.core.audio.SoundSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -17,9 +19,13 @@ import kotlinx.coroutines.launch
 class SettingsViewModel @Inject constructor(
     private val audioRouter: AudioRouter,
     private val micLoopback: MicLoopback,
+    private val soundSettings: SoundSettingsRepository,
 ) : ViewModel() {
     /** Where audio is going during the headset test. */
     val route: StateFlow<AudioRoute> = audioRouter.route
+
+    /** How the rider hears the others (equalizer and volume boost). */
+    val sound: StateFlow<SoundSettings> = soundSettings.settings
 
     private val mutableTesting = MutableStateFlow(false)
     val testing: StateFlow<Boolean> = mutableTesting.asStateFlow()
@@ -46,4 +52,6 @@ class SettingsViewModel @Inject constructor(
     fun stopTest() {
         testJob?.cancel()
     }
+
+    fun updateSound(settings: SoundSettings) = soundSettings.update(settings)
 }

@@ -32,16 +32,21 @@ import com.carmelitasoftworks.motointercom.core.ui.theme.MotoIntercomTheme
 fun SettingsScreen(modifier: Modifier = Modifier, viewModel: SettingsViewModel = hiltViewModel()) {
     val route by viewModel.route.collectAsStateWithLifecycle()
     val testing by viewModel.testing.collectAsStateWithLifecycle()
+    val sound by viewModel.sound.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) viewModel.startTest()
     }
 
-    HeadsetTest(
-        route = route,
-        testing = testing,
-        onToggleTest = {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(32.dp),
+    ) {
+        HeadsetTest(route = route, testing = testing, onToggleTest = {
             val granted = context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
                 PackageManager.PERMISSION_GRANTED
             when {
@@ -49,20 +54,14 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: SettingsViewModel =
                 granted -> viewModel.startTest()
                 else -> micPermission.launch(Manifest.permission.RECORD_AUDIO)
             }
-        },
-        modifier = modifier,
-    )
+        })
+        SoundSection(settings = sound, onChange = viewModel::updateSound)
+    }
 }
 
 @Composable
 private fun HeadsetTest(route: AudioRoute, testing: Boolean, onToggleTest: () -> Unit, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(
             text = stringResource(R.string.headset_test_title),
             style = MaterialTheme.typography.headlineMedium,

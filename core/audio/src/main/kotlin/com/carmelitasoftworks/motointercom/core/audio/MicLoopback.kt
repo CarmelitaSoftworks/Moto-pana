@@ -8,7 +8,9 @@ import android.media.AudioTrack
 import android.media.MediaRecorder
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -24,7 +26,7 @@ fun interface MicLoopback {
     suspend fun run(shouldPlay: () -> Boolean)
 }
 
-class AndroidMicLoopback @Inject constructor() : MicLoopback {
+class AndroidMicLoopback @Inject constructor(private val soundEffects: SoundEffects) : MicLoopback {
     @SuppressLint("MissingPermission") // Documented precondition of MicLoopback.run.
     override suspend fun run(shouldPlay: () -> Boolean) = withContext(Dispatchers.IO) {
         val recordBuffer = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, ENCODING)
@@ -53,8 +55,11 @@ class AndroidMicLoopback @Inject constructor() : MicLoopback {
             .setBufferSizeInBytes(trackBuffer * 2)
             .setTransferMode(AudioTrack.MODE_STREAM)
             .build()
+        var effects: Job? = null
         try {
             if (record.state != AudioRecord.STATE_INITIALIZED) return@withContext
+            // Lets the rider hear their sound settings on their own voice.
+            effects = launch { soundEffects.applyTo(track.audioSessionId) }
             record.startRecording()
             track.play()
             val samples = ShortArray(recordBuffer / 2)
@@ -64,6 +69,7 @@ class AndroidMicLoopback @Inject constructor() : MicLoopback {
                 if (read > 0 && shouldPlay()) track.write(samples, 0, read)
             }
         } finally {
+            effects?.cancel()
             record.release()
             track.release()
         }

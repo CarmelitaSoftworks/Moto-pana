@@ -9,6 +9,16 @@
     <string name="headset_test_route">Salida de audio: %1$s</string>
     <string name="headset_test_no_headset">No se detectan auriculares. Para evitar acoples, tu voz solo se reproduce por auriculares.</string>
 
+    <string name="sound_title">Sonido</string>
+    <string name="sound_description">Ajusta cómo oyes a los demás por el casco. Solo cambia lo que tú oyes. Puedes escucharlo con la prueba de auriculares.</string>
+    <string name="sound_boost">Refuerzo de volumen: %1$+d dB</string>
+    <string name="sound_preset_normal">Normal</string>
+    <string name="sound_preset_clear_voice">Voz clara</string>
+    <string name="sound_preset_more_bass">Más graves</string>
+    <string name="sound_bass">Graves: %1$+d dB</string>
+    <string name="sound_mid">Medios: %1$+d dB</string>
+    <string name="sound_treble">Agudos: %1$+d dB</string>
+
     <string name="route_none">Conectando…</string>
     <string name="route_bluetooth_sco">Auriculares Bluetooth</string>
     <string name="route_bluetooth_le">Auriculares Bluetooth (LE Audio)</string>

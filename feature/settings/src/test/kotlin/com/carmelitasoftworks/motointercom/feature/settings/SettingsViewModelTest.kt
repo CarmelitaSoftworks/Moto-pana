@@ -3,6 +3,9 @@ package com.carmelitasoftworks.motointercom.feature.settings
 import com.carmelitasoftworks.motointercom.core.audio.AudioRoute
 import com.carmelitasoftworks.motointercom.core.audio.AudioRouter
 import com.carmelitasoftworks.motointercom.core.audio.MicLoopback
+import com.carmelitasoftworks.motointercom.core.audio.SoundPreset
+import com.carmelitasoftworks.motointercom.core.audio.SoundSettings
+import com.carmelitasoftworks.motointercom.core.audio.SoundSettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
@@ -32,7 +35,7 @@ class SettingsViewModelTest {
     @Test
     fun `headset test holds the audio route only while it runs`() = runTest(dispatcher) {
         val router = FakeAudioRouter()
-        val viewModel = SettingsViewModel(router, micLoopback = { awaitCancellation() })
+        val viewModel = SettingsViewModel(router, micLoopback = { awaitCancellation() }, FakeSoundSettingsRepository())
 
         viewModel.startTest()
         runCurrent()
@@ -54,10 +57,21 @@ class SettingsViewModelTest {
             awaitCancellation()
         }
 
-        SettingsViewModel(router, loopback).startTest()
+        SettingsViewModel(router, loopback, FakeSoundSettingsRepository()).startTest()
         runCurrent()
 
         assertEquals(false, playedOnSpeaker)
+    }
+
+    @Test
+    fun `sound changes are stored and published`() {
+        val repository = FakeSoundSettingsRepository()
+        val viewModel = SettingsViewModel(FakeAudioRouter(), micLoopback = { awaitCancellation() }, repository)
+
+        viewModel.updateSound(SoundPreset.MORE_BASS.applyTo(SoundSettings(boostDb = 6)))
+
+        assertEquals(6, viewModel.sound.value.boostDb)
+        assertTrue(SoundPreset.MORE_BASS.matches(repository.settings.value))
     }
 }
 
@@ -70,5 +84,13 @@ private class FakeAudioRouter(private val routeWhenStarted: AudioRoute = AudioRo
 
     override fun stop() {
         route.value = AudioRoute.NONE
+    }
+}
+
+private class FakeSoundSettingsRepository : SoundSettingsRepository {
+    override val settings = MutableStateFlow(SoundSettings())
+
+    override fun update(settings: SoundSettings) {
+        this.settings.value = settings.clamped()
     }
 }

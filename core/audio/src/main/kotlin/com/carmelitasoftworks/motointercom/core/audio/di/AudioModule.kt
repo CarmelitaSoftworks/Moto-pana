@@ -4,6 +4,8 @@ import com.carmelitasoftworks.motointercom.core.audio.AndroidAudioRouter
 import com.carmelitasoftworks.motointercom.core.audio.AndroidMicLoopback
 import com.carmelitasoftworks.motointercom.core.audio.AudioRouter
 import com.carmelitasoftworks.motointercom.core.audio.MicLoopback
+import com.carmelitasoftworks.motointercom.core.audio.PrefsSoundSettingsRepository
+import com.carmelitasoftworks.motointercom.core.audio.SoundSettingsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,4 +19,7 @@ internal interface AudioModule {
 
     @Binds
     fun bindMicLoopback(impl: AndroidMicLoopback): MicLoopback
+
+    @Binds
+    fun bindSoundSettingsRepository(impl: PrefsSoundSettingsRepository): SoundSettingsRepository
 }
