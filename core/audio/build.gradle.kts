@@ -8,7 +8,6 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.annotation)
     implementation(libs.kotlinx.coroutines.android)
-
-    testImplementation(libs.kotlinx.coroutines.test)
 }

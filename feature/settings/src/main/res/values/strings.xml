@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_title">Ajustes</string>
-    <string name="settings_placeholder">Aquí podrás elegir el modo de voz, la sensibilidad y la calidad.</string>
+
+    <string name="headset_test_title">Prueba de auriculares</string>
+    <string name="headset_test_description">Conecta el casco o los auriculares por Bluetooth (o por cable) y pulsa el botón. Deberías oír tu propia voz por ellos.</string>
+    <string name="headset_test_start">Probar auriculares</string>
+    <string name="headset_test_stop">Detener prueba</string>
+    <string name="headset_test_route">Salida de audio: %1$s</string>
+    <string name="headset_test_no_headset">No se detectan auriculares. Para evitar acoples, tu voz solo se reproduce por auriculares.</string>
+
+    <string name="route_none">Conectando…</string>
+    <string name="route_bluetooth_sco">Auriculares Bluetooth</string>
+    <string name="route_bluetooth_le">Auriculares Bluetooth (LE Audio)</string>
+    <string name="route_wired_headset">Auriculares con cable</string>
+    <string name="route_speaker">Altavoz del teléfono</string>
 </resources>
