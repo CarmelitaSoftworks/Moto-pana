@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Moto Intercom</string>
+    <string name="nav_group">Grupo</string>
+    <string name="nav_ride">Viaje</string>
+    <string name="nav_settings">Ajustes</string>
+</resources>
