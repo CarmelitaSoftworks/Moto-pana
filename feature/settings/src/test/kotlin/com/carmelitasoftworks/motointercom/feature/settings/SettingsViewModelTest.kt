@@ -68,7 +68,8 @@ class SettingsViewModelTest {
         val repository = FakeSoundSettingsRepository()
         val viewModel = SettingsViewModel(FakeAudioRouter(), micLoopback = { awaitCancellation() }, repository)
 
-        viewModel.updateSound(SoundPreset.MORE_BASS.applyTo(SoundSettings(boostDb = 6)))
+        viewModel.updateSound { it.copy(boostDb = 6) }
+        viewModel.updateSound(SoundPreset.MORE_BASS::applyTo)
 
         assertEquals(6, viewModel.sound.value.boostDb)
         assertTrue(SoundPreset.MORE_BASS.matches(repository.settings.value))
@@ -90,7 +91,7 @@ private class FakeAudioRouter(private val routeWhenStarted: AudioRoute = AudioRo
 private class FakeSoundSettingsRepository : SoundSettingsRepository {
     override val settings = MutableStateFlow(SoundSettings())
 
-    override fun update(settings: SoundSettings) {
-        this.settings.value = settings.clamped()
+    override fun update(transform: (SoundSettings) -> SoundSettings) {
+        settings.value = transform(settings.value).clamped()
     }
 }

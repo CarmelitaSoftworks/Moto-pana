@@ -7,12 +7,17 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.updateAndGet
 
 interface SoundSettingsRepository {
     val settings: StateFlow<SoundSettings>
 
-    /** Stores [settings] (clamped to the supported ranges) and publishes them. */
-    fun update(settings: SoundSettings)
+    /**
+     * Applies [transform] to the latest settings, then stores and publishes the
+     * result clamped to the supported ranges. Taking a transform (not a value)
+     * keeps two quick changes from overwriting each other.
+     */
+    fun update(transform: (SoundSettings) -> SoundSettings)
 }
 
 /** Keeps the settings in SharedPreferences so they survive restarts. */
@@ -31,9 +36,10 @@ class PrefsSoundSettingsRepository @Inject constructor(@ApplicationContext conte
     )
     override val settings: StateFlow<SoundSettings> = mutableSettings.asStateFlow()
 
-    override fun update(settings: SoundSettings) {
-        val clamped = settings.clamped()
-        mutableSettings.value = clamped
+    override fun update(transform: (SoundSettings) -> SoundSettings) {
+        val before = mutableSettings.value
+        val clamped = mutableSettings.updateAndGet { transform(it).clamped() }
+        if (clamped == before) return
         prefs.edit()
             .putInt(KEY_BASS, clamped.bassDb)
             .putInt(KEY_MID, clamped.midDb)

@@ -16,11 +16,7 @@ import androidx.compose.ui.unit.dp
 
 /** Title + explanation shown by screens whose real content has not been built yet. */
 @Composable
-fun PlaceholderScreen(
-    @StringRes titleRes: Int,
-    @StringRes bodyRes: Int,
-    modifier: Modifier = Modifier,
-) {
+fun PlaceholderScreen(@StringRes titleRes: Int, @StringRes bodyRes: Int, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()

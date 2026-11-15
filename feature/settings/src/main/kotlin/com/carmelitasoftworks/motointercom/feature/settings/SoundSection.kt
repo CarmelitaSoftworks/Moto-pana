@@ -6,25 +6,36 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.carmelitasoftworks.motointercom.core.audio.SoundPreset
 import com.carmelitasoftworks.motointercom.core.audio.SoundSettings
 import com.carmelitasoftworks.motointercom.core.ui.theme.MotoIntercomTheme
-import kotlin.math.roundToInt
 
-/** Volume boost plus a three-band equalizer for what the rider hears. */
+/**
+ * Volume boost plus a three-band equalizer for what the rider hears.
+ *
+ * [onUpdate] takes a transform of the latest settings, so two quick taps never
+ * overwrite each other with a stale snapshot.
+ */
 @Composable
-internal fun SoundSection(settings: SoundSettings, onChange: (SoundSettings) -> Unit, modifier: Modifier = Modifier) {
+internal fun SoundSection(
+    settings: SoundSettings,
+    onUpdate: ((SoundSettings) -> SoundSettings) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(
             text = stringResource(R.string.sound_title),
@@ -34,49 +45,48 @@ internal fun SoundSection(settings: SoundSettings, onChange: (SoundSettings) -> 
             text = stringResource(R.string.sound_description),
             style = MaterialTheme.typography.bodyLarge,
         )
-        DbSlider(
+        DbStepper(
             labelRes = R.string.sound_boost,
+            nameRes = R.string.sound_boost_name,
             value = settings.boostDb,
-            range = SoundSettings.BOOST_RANGE_DB,
-            onChange = { onChange(settings.copy(boostDb = it)) },
+            onStep = { delta -> onUpdate { it.copy(boostDb = it.boostDb + delta * BOOST_STEP_DB) } },
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SoundPreset.entries.forEach { preset ->
-                PresetButton(
-                    preset = preset,
-                    selected = preset.matches(settings),
-                    onClick = { onChange(preset.applyTo(settings)) },
-                    modifier = Modifier.weight(1f),
-                )
-            }
+        SoundPreset.entries.forEach { preset ->
+            PresetButton(
+                preset = preset,
+                selected = preset.matches(settings),
+                onClick = { onUpdate(preset::applyTo) },
+            )
         }
-        DbSlider(
+        DbStepper(
             labelRes = R.string.sound_bass,
+            nameRes = R.string.sound_bass_name,
             value = settings.bassDb,
-            range = SoundSettings.EQ_RANGE_DB,
-            onChange = { onChange(settings.copy(bassDb = it)) },
+            onStep = { delta -> onUpdate { it.copy(bassDb = it.bassDb + delta) } },
         )
-        DbSlider(
+        DbStepper(
             labelRes = R.string.sound_mid,
+            nameRes = R.string.sound_mid_name,
             value = settings.midDb,
-            range = SoundSettings.EQ_RANGE_DB,
-            onChange = { onChange(settings.copy(midDb = it)) },
+            onStep = { delta -> onUpdate { it.copy(midDb = it.midDb + delta) } },
         )
-        DbSlider(
+        DbStepper(
             labelRes = R.string.sound_treble,
+            nameRes = R.string.sound_treble_name,
             value = settings.trebleDb,
-            range = SoundSettings.EQ_RANGE_DB,
-            onChange = { onChange(settings.copy(trebleDb = it)) },
+            onStep = { delta -> onUpdate { it.copy(trebleDb = it.trebleDb + delta) } },
         )
     }
 }
 
 @Composable
 private fun PresetButton(preset: SoundPreset, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    // Glove-sized target (CLAUDE.md §6); the filled button marks the active preset.
-    val sized = modifier.heightIn(min = 64.dp)
+    // Full-width, glove-sized target (CLAUDE.md §6); the filled button marks the active preset.
+    val sized = modifier
+        .fillMaxWidth()
+        .heightIn(min = GloveTarget)
     val label = @Composable {
-        Text(text = stringResource(preset.labelRes), textAlign = TextAlign.Center)
+        Text(text = stringResource(preset.labelRes), style = MaterialTheme.typography.titleMedium)
     }
     if (selected) {
         Button(onClick = onClick, modifier = sized) { label() }
@@ -85,29 +95,55 @@ private fun PresetButton(preset: SoundPreset, selected: Boolean, onClick: () -> 
     }
 }
 
-/** A whole-decibel slider with its current value in the label. */
+/**
+ * A decibel value with big minus / plus buttons; easier to hit with gloves than
+ * a slider. [onStep] receives -1 or +1; out-of-range results are clamped by the repository.
+ */
 @Composable
-private fun DbSlider(
+private fun DbStepper(
     @StringRes labelRes: Int,
+    @StringRes nameRes: Int,
     value: Int,
-    range: IntRange,
-    onChange: (Int) -> Unit,
+    onStep: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier) {
+    val name = stringResource(nameRes)
+    val decrease = stringResource(R.string.sound_decrease, name)
+    val increase = stringResource(R.string.sound_increase, name)
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        FilledTonalButton(
+            onClick = { onStep(-1) },
+            modifier = Modifier
+                .size(GloveTarget)
+                .semantics { contentDescription = decrease },
+        ) {
+            Text(text = "−", style = MaterialTheme.typography.headlineSmall)
+        }
         Text(
-            text = stringResource(labelRes, value),
+            text = stringResource(labelRes, value.signed()),
             style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f),
         )
-        Slider(
-            value = value.toFloat(),
-            onValueChange = { onChange(it.roundToInt()) },
-            valueRange = range.first.toFloat()..range.last.toFloat(),
-            steps = range.last - range.first - 1,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        FilledTonalButton(
+            onClick = { onStep(1) },
+            modifier = Modifier
+                .size(GloveTarget)
+                .semantics { contentDescription = increase },
+        ) {
+            Text(text = "+", style = MaterialTheme.typography.headlineSmall)
+        }
     }
 }
+
+private val GloveTarget = 64.dp
+private const val BOOST_STEP_DB = 2
+
+/** "+3", "0", "-3": a sign only where it carries information. */
+private fun Int.signed(): String = if (this > 0) "+$this" else toString()
 
 @get:StringRes
 private val SoundPreset.labelRes: Int
@@ -121,6 +157,6 @@ private val SoundPreset.labelRes: Int
 @Composable
 private fun SoundSectionPreview() {
     MotoIntercomTheme {
-        SoundSection(settings = SoundPreset.CLEAR_VOICE.applyTo(SoundSettings(boostDb = 6)), onChange = {})
+        SoundSection(settings = SoundPreset.CLEAR_VOICE.applyTo(SoundSettings(boostDb = 6)), onUpdate = {})
     }
 }

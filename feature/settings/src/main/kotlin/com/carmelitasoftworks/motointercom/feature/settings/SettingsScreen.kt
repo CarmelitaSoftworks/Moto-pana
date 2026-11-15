@@ -55,7 +55,7 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: SettingsViewModel =
                 else -> micPermission.launch(Manifest.permission.RECORD_AUDIO)
             }
         })
-        SoundSection(settings = sound, onChange = viewModel::updateSound)
+        SoundSection(settings = sound, onUpdate = viewModel::updateSound)
     }
 }
 

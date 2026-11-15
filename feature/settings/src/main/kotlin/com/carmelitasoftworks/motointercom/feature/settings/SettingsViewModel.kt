@@ -53,5 +53,5 @@ class SettingsViewModel @Inject constructor(
         testJob?.cancel()
     }
 
-    fun updateSound(settings: SoundSettings) = soundSettings.update(settings)
+    fun updateSound(transform: (SoundSettings) -> SoundSettings) = soundSettings.update(transform)
 }

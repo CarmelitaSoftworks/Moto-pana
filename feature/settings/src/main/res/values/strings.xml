@@ -10,14 +10,20 @@
     <string name="headset_test_no_headset">No se detectan auriculares. Para evitar acoples, tu voz solo se reproduce por auriculares.</string>
 
     <string name="sound_title">Sonido</string>
-    <string name="sound_description">Ajusta cómo oyes a los demás por el casco. Solo cambia lo que tú oyes. Puedes escucharlo con la prueba de auriculares.</string>
-    <string name="sound_boost">Refuerzo de volumen: %1$+d dB</string>
+    <string name="sound_description">Ajusta cómo oyes por el casco. Solo cambia lo que tú oyes, no cómo te oyen. Por ahora se aplica en la prueba de auriculares; se aplicará a la voz del grupo cuando esté disponible.</string>
+    <string name="sound_boost">Refuerzo de volumen: %1$s dB</string>
     <string name="sound_preset_normal">Normal</string>
     <string name="sound_preset_clear_voice">Voz clara</string>
     <string name="sound_preset_more_bass">Más graves</string>
-    <string name="sound_bass">Graves: %1$+d dB</string>
-    <string name="sound_mid">Medios: %1$+d dB</string>
-    <string name="sound_treble">Agudos: %1$+d dB</string>
+    <string name="sound_decrease">Bajar %1$s</string>
+    <string name="sound_increase">Subir %1$s</string>
+    <string name="sound_bass_name">graves</string>
+    <string name="sound_mid_name">medios</string>
+    <string name="sound_treble_name">agudos</string>
+    <string name="sound_boost_name">refuerzo de volumen</string>
+    <string name="sound_bass">Graves: %1$s dB</string>
+    <string name="sound_mid">Medios: %1$s dB</string>
+    <string name="sound_treble">Agudos: %1$s dB</string>
 
     <string name="route_none">Conectando…</string>
     <string name="route_bluetooth_sco">Auriculares Bluetooth</string>

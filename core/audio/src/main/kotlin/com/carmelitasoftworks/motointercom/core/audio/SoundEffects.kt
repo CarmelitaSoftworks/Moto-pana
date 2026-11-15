@@ -1,27 +1,31 @@
 package com.carmelitasoftworks.motointercom.core.audio
 
+import android.media.audiofx.AudioEffect
 import android.media.audiofx.Equalizer
 import android.media.audiofx.LoudnessEnhancer
 import javax.inject.Inject
 
-/** Applies the rider's [SoundSettings] to a playback stream using the platform audio effects. */
+/**
+ * Applies the rider's [SoundSettings] to a playback stream using the platform audio effects.
+ *
+ * Today the only stream is the headset test; the intercom's own playback gets
+ * wired in together with the RTC client (work order step 3).
+ */
 class SoundEffects @Inject constructor(private val repository: SoundSettingsRepository) {
     /**
      * Attaches the effects to [audioSessionId] and keeps them in sync with the
      * settings until the calling coroutine is cancelled.
      *
-     * Some phones refuse effects on call audio; those are skipped and playback
-     * simply stays unprocessed.
+     * Some phones refuse effects on call audio; a refused effect is skipped
+     * without affecting the other one, and playback simply stays unprocessed.
      */
     suspend fun applyTo(audioSessionId: Int): Nothing {
-        val equalizer = runCatching { Equalizer(0, audioSessionId).apply { enabled = true } }.getOrNull()
-        val enhancer = runCatching { LoudnessEnhancer(audioSessionId).apply { enabled = true } }.getOrNull()
+        val equalizer = enabledOrNull { Equalizer(0, audioSessionId) }
+        val enhancer = enabledOrNull { LoudnessEnhancer(audioSessionId) }
         try {
             repository.settings.collect { settings ->
-                runCatching {
-                    equalizer?.apply(settings)
-                    enhancer?.setTargetGain(settings.boostDb * MILLIBELS_PER_DB)
-                }
+                runCatching { equalizer?.setBands(settings) }
+                runCatching { enhancer?.setTargetGain(settings.boostDb * MILLIBELS_PER_DB) }
             }
         } finally {
             equalizer?.release()
@@ -29,8 +33,16 @@ class SoundEffects @Inject constructor(private val repository: SoundSettingsRepo
         }
     }
 
+    /** Creates and enables an effect, releasing it again if the phone refuses to enable it. */
+    private fun <T : AudioEffect> enabledOrNull(create: () -> T): T? {
+        val effect = runCatching(create).getOrNull() ?: return null
+        return runCatching { effect.apply { enabled = true } }
+            .onFailure { effect.release() }
+            .getOrNull()
+    }
+
     /** Spreads the three bands over however many bands this phone's equalizer has. */
-    private fun Equalizer.apply(settings: SoundSettings) {
+    private fun Equalizer.setBands(settings: SoundSettings) {
         val (minLevel, maxLevel) = bandLevelRange
         for (band in 0 until numberOfBands) {
             val centerHz = getCenterFreq(band.toShort()) / MILLIHERTZ_PER_HZ
