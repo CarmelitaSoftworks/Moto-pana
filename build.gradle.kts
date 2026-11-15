@@ -1,6 +1,3 @@
-import io.gitlab.arturbosch.detekt.extensions.DetektExtension
-import org.jlleitschuh.gradle.ktlint.KtlintExtension
-
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
@@ -12,19 +9,10 @@ plugins {
     alias(libs.plugins.detekt) apply false
 }
 
-subprojects {
-    // Only modules with a build script; ":core" and ":feature" are just containers.
-    if (!buildFile.exists()) return@subprojects
-
-    apply(plugin = "org.jlleitschuh.gradle.ktlint")
-    apply(plugin = "io.gitlab.arturbosch.detekt")
-
-    extensions.configure<KtlintExtension> {
-        android.set(true)
-    }
-
-    extensions.configure<DetektExtension> {
-        buildUponDefaultConfig = true
-        config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+// `./gradlew ktlintCheck detekt` also lints the convention plugins in build-logic.
+listOf("ktlintCheck", "ktlintFormat", "detekt").forEach { name ->
+    tasks.register(name) {
+        group = "verification"
+        dependsOn(gradle.includedBuild("build-logic").task(":convention:$name"))
     }
 }

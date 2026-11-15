@@ -8,5 +8,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.livekit.android)
+    // The LiveKit SDK is added in work order step 3, together with the code that uses it.
+    implementation(libs.kotlinx.coroutines.android)
+
+    testImplementation(libs.kotlinx.coroutines.test)
 }

@@ -17,6 +17,7 @@ requisitos y el orden de trabajo están en [CLAUDE.md](CLAUDE.md).
 | `core/audio` | `AudioRouter`: enrutamiento Bluetooth y foco de audio |
 | `core/rtc` | `RtcClient`: wrapper de LiveKit |
 | `core/service` | `IntercomService`: servicio en primer plano de la sesión |
+| `core/ui` | Tema y componentes Compose compartidos |
 | `feature/group` | Crear grupo o unirse a uno |
 | `feature/ride` | Pantalla de viaje |
 | `feature/settings` | Ajustes |

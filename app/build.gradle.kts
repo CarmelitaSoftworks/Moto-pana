@@ -25,12 +25,12 @@ dependencies {
     implementation(project(":core:audio"))
     implementation(project(":core:rtc"))
     implementation(project(":core:service"))
+    implementation(project(":core:ui"))
     implementation(project(":feature:group"))
     implementation(project(":feature:ride"))
     implementation(project(":feature:settings"))
 
-    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.compose.material.icons.core)
 }

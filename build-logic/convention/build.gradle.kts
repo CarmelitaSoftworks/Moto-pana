@@ -2,6 +2,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     `kotlin-dsl`
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
 }
 
 group = "com.carmelitasoftworks.motointercom.buildlogic"
@@ -17,9 +19,16 @@ kotlin {
     }
 }
 
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(file("../../config/detekt/detekt.yml"))
+}
+
 dependencies {
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
+    compileOnly(libs.ktlint.gradlePlugin)
+    compileOnly(libs.detekt.gradlePlugin)
 }
 
 gradlePlugin {

@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.CommonExtension
+import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalog
@@ -8,6 +9,7 @@ import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 internal val Project.libs: VersionCatalog
     get() = extensions.getByType<VersionCatalogsExtension>().named("libs")
@@ -42,15 +44,28 @@ internal fun Project.configureKotlinAndroid(android: CommonExtension<*, *, *, *,
         }
     }
 
+    // Only the JUnit 5 baseline; modules add MockK / Turbine / coroutines-test as they need them.
     dependencies {
-        "implementation"(libs.lib("kotlinx-coroutines-android"))
-
         "testImplementation"(platform(libs.lib("junit-bom")))
         "testImplementation"(libs.lib("junit-jupiter"))
         "testRuntimeOnly"(libs.lib("junit-platform-launcher"))
-        "testImplementation"(libs.lib("mockk"))
-        "testImplementation"(libs.lib("turbine"))
-        "testImplementation"(libs.lib("kotlinx-coroutines-test"))
+    }
+
+    configureLint()
+}
+
+/** ktlint + detekt with the shared config (CLAUDE.md §7). */
+internal fun Project.configureLint() {
+    pluginManager.apply("org.jlleitschuh.gradle.ktlint")
+    pluginManager.apply("io.gitlab.arturbosch.detekt")
+
+    extensions.configure<KtlintExtension> {
+        android.set(true)
+    }
+
+    extensions.configure<DetektExtension> {
+        buildUponDefaultConfig = true
+        config.setFrom(rootProject.layout.projectDirectory.file("config/detekt/detekt.yml"))
     }
 }
 
@@ -63,7 +78,6 @@ internal fun Project.configureCompose(android: CommonExtension<*, *, *, *, *, *>
         "implementation"(libs.lib("compose-ui"))
         "implementation"(libs.lib("compose-ui-tooling-preview"))
         "implementation"(libs.lib("compose-material3"))
-        "implementation"(libs.lib("compose-material-icons-core"))
         "debugImplementation"(libs.lib("compose-ui-tooling"))
     }
 }

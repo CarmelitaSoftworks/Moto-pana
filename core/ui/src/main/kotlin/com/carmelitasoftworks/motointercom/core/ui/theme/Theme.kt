@@ -1,4 +1,4 @@
-package com.carmelitasoftworks.motointercom.ui.theme
+package com.carmelitasoftworks.motointercom.core.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme

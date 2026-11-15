@@ -12,10 +12,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // LiveKit pulls a few transitive artifacts from JitPack.
-        maven("https://jitpack.io") {
-            content { includeGroupByRegex("com\\.github\\..*") }
-        }
     }
 }
 
@@ -25,6 +21,7 @@ include(":app")
 include(":core:audio")
 include(":core:rtc")
 include(":core:service")
+include(":core:ui")
 include(":feature:group")
 include(":feature:ride")
 include(":feature:settings")

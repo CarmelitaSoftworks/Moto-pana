@@ -5,8 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.carmelitasoftworks.motointercom.core.ui.theme.MotoIntercomTheme
 import com.carmelitasoftworks.motointercom.navigation.MotoIntercomApp
-import com.carmelitasoftworks.motointercom.ui.theme.MotoIntercomTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

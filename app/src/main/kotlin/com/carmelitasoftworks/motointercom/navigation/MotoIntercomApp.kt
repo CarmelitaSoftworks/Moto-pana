@@ -22,9 +22,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.carmelitasoftworks.motointercom.R
 import com.carmelitasoftworks.motointercom.feature.group.GroupScreen
+import com.carmelitasoftworks.motointercom.feature.group.R as GroupR
+import com.carmelitasoftworks.motointercom.feature.ride.R as RideR
 import com.carmelitasoftworks.motointercom.feature.ride.RideScreen
+import com.carmelitasoftworks.motointercom.feature.settings.R as SettingsR
 import com.carmelitasoftworks.motointercom.feature.settings.SettingsScreen
 
 private enum class TopLevelDestination(
@@ -32,9 +34,9 @@ private enum class TopLevelDestination(
     @StringRes val labelRes: Int,
     val icon: ImageVector,
 ) {
-    GROUP("group", R.string.nav_group, Icons.Filled.Home),
-    RIDE("ride", R.string.nav_ride, Icons.Filled.Call),
-    SETTINGS("settings", R.string.nav_settings, Icons.Filled.Settings),
+    GROUP("group", GroupR.string.group_title, Icons.Filled.Home),
+    RIDE("ride", RideR.string.ride_title, Icons.Filled.Call),
+    SETTINGS("settings", SettingsR.string.settings_title, Icons.Filled.Settings),
 }
 
 @Composable

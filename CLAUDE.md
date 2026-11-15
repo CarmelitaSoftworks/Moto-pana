@@ -53,6 +53,7 @@ app/                    → entrypoint, navegación, DI
 core/audio/             → enrutamiento Bluetooth, AudioManager, foco de audio, procesamiento
 core/rtc/               → wrapper de LiveKit (conectar, publicar mic, suscribir, reconexión)
 core/service/           → Foreground Service de la sesión de intercom
+core/ui/                → tema y componentes Compose compartidos por las features
 feature/group/          → crear/unirse a grupo, código QR / código de 6 caracteres
 feature/ride/           → pantalla de viaje (quién habla, mute, PTT, volumen)
 feature/settings/       → modo de voz, sensibilidad, calidad, perfil
