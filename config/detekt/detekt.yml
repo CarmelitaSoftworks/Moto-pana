@@ -13,6 +13,9 @@ complexity:
     thresholdInClasses: 15
   LongMethod:
     ignoreAnnotated: ['Composable']
+  CyclomaticComplexMethod:
+    # Screens branch on state by nature; logic that needs testing lives in ViewModels.
+    ignoreAnnotated: ['Composable']
 
 style:
   MagicNumber:

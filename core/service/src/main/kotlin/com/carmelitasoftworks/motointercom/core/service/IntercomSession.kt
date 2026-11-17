@@ -4,6 +4,14 @@ import com.carmelitasoftworks.motointercom.core.audio.AudioRoute
 import com.carmelitasoftworks.motointercom.core.rtc.RemoteRider
 import com.carmelitasoftworks.motointercom.core.rtc.RtcConnectionState
 
+enum class IntercomMode {
+    /** Through the internet voice server: any distance, needs mobile data. */
+    ONLINE,
+
+    /** Phone to phone over Bluetooth / Wi-Fi: no internet, about 50–100 m. */
+    NEARBY,
+}
+
 enum class TalkMode {
     /** Mic always published; Opus DTX keeps silence nearly free (CLAUDE.md §4, "voz abierta"). */
     OPEN,
@@ -28,6 +36,9 @@ sealed interface IntercomSession {
 
     data class Active(
         val code: String,
+        val mode: IntercomMode,
+        /** NEARBY: this phone hosts the group; leaving ends it for everyone. */
+        val nearbyHost: Boolean,
         val connection: RtcConnectionState,
         val route: AudioRoute,
         val talkMode: TalkMode,

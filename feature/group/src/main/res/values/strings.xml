@@ -13,6 +13,16 @@
     <string name="group_in_ride">Estás en el grupo %1$s</string>
     <string name="group_go_to_ride">Ir al viaje</string>
     <string name="group_coverage_note">El intercom usa los datos móviles: sin cobertura no hay comunicación.</string>
+    <string name="mode_online">Por internet</string>
+    <string name="mode_nearby">Sin internet (cerca)</string>
+    <string name="nearby_explainer">Los teléfonos se conectan entre sí por Bluetooth y Wi-Fi, sin datos ni cobertura. Alcance aproximado: 50–100 m en campo abierto, menos entre edificios. Quien crea el grupo reenvía la voz de todos: si sale, el grupo se cierra.</string>
+    <string name="nearby_create">Crear grupo cercano</string>
+    <string name="nearby_found_title">Grupos cerca</string>
+    <string name="nearby_searching">Buscando grupos cerca… Acércate al teléfono que creó el grupo.</string>
+    <string name="nearby_join">Unirse al grupo de %1$s</string>
+    <string name="nearby_permissions_needed">Para el modo sin internet hace falta el permiso de dispositivos cercanos.</string>
+    <string name="nearby_grant">Dar permiso</string>
+    <string name="nearby_location_hint">En este Android, la búsqueda necesita la ubicación del teléfono activada.</string>
     <string name="error_server_not_configured">Esta versión de la app no tiene servidor de voz configurado.</string>
     <string name="error_no_network">No hay conexión a internet. Revisa los datos móviles.</string>
     <string name="error_server_rejected">El servidor de voz rechazó la conexión.</string>

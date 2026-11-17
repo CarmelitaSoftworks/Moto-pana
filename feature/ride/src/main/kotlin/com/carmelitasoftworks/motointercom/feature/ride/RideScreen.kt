@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carmelitasoftworks.motointercom.core.audio.AudioRoute
 import com.carmelitasoftworks.motointercom.core.rtc.RemoteRider
 import com.carmelitasoftworks.motointercom.core.rtc.RtcConnectionState
+import com.carmelitasoftworks.motointercom.core.service.IntercomMode
 import com.carmelitasoftworks.motointercom.core.service.IntercomSession
 import com.carmelitasoftworks.motointercom.core.service.TalkMode
 import com.carmelitasoftworks.motointercom.core.ui.BigButton
@@ -134,15 +135,26 @@ private fun ActiveRide(session: IntercomSession.Active, actions: RideActions, mo
 
 @Composable
 private fun Header(session: IntercomSession.Active, onShare: () -> Unit) {
+    val nearby = session.mode == IntercomMode.NEARBY
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(
-                text = stringResource(R.string.ride_code, session.code),
+                text = if (nearby) {
+                    stringResource(R.string.ride_nearby_label)
+                } else {
+                    stringResource(R.string.ride_code, session.code)
+                },
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = stringResource(session.connection.labelRes),
+                text = stringResource(
+                    if (nearby && session.connection == RtcConnectionState.RECONNECTING) {
+                        R.string.status_nearby_searching
+                    } else {
+                        session.connection.labelRes
+                    },
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 color = when (session.connection) {
                     RtcConnectionState.CONNECTED -> MaterialTheme.colorScheme.secondary
@@ -160,9 +172,19 @@ private fun Header(session: IntercomSession.Active, onShare: () -> Unit) {
                 },
             )
         }
-        FilledTonalButton(onClick = onShare, modifier = Modifier.heightIn(min = GloveTarget)) {
-            Text(stringResource(R.string.ride_share))
+        // A nearby group is found by being close, not by its code.
+        if (!nearby) {
+            FilledTonalButton(onClick = onShare, modifier = Modifier.heightIn(min = GloveTarget)) {
+                Text(stringResource(R.string.ride_share))
+            }
         }
+    }
+    if (session.nearbyHost) {
+        Text(
+            text = stringResource(R.string.ride_nearby_host_note),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -327,6 +349,8 @@ private fun ActiveRidePreview() {
         ActiveRide(
             session = IntercomSession.Active(
                 code = "ABC234",
+                mode = IntercomMode.ONLINE,
+                nearbyHost = false,
                 connection = RtcConnectionState.CONNECTED,
                 route = AudioRoute.BLUETOOTH_SCO,
                 talkMode = TalkMode.OPEN,

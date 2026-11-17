@@ -26,20 +26,13 @@ data class RoomState(
 )
 
 /**
- * Thin wrapper over the LiveKit room for one riding group: connect, publish the
- * microphone, subscribe to the others and survive network changes
- * (see CLAUDE.md §5.3). One room per group; room name = group code.
- *
- * Audio routing is not its job: [AudioRouter][com.carmelitasoftworks.motointercom.core.audio.AudioRouter]
- * owns it, so the implementation must not touch the platform audio mode or devices.
+ * A live voice link to the group, whatever carries it (internet room or nearby radio).
+ * The session manager drives every transport through this.
  */
-interface RtcClient {
+interface VoiceTransport {
     val state: StateFlow<RoomState>
 
-    /** Joins the room at [url] with a [token]; returns once connected or throws. */
-    suspend fun connect(url: String, token: String)
-
-    /** Publishes or unpublishes the local microphone (mute / push-to-talk). */
+    /** Sends or stops sending our voice (mute / push-to-talk). */
     suspend fun setMicrophoneEnabled(enabled: Boolean)
 
     /** Stops or resumes hearing one rider, without affecting anyone else. */
@@ -49,4 +42,17 @@ interface RtcClient {
     fun setPlaybackGain(gain: Double)
 
     fun disconnect()
+}
+
+/**
+ * Thin wrapper over the LiveKit room for one riding group: connect, publish the
+ * microphone, subscribe to the others and survive network changes
+ * (see CLAUDE.md §5.3). One room per group; room name = group code.
+ *
+ * Audio routing is not its job: [AudioRouter][com.carmelitasoftworks.motointercom.core.audio.AudioRouter]
+ * owns it, so the implementation must not touch the platform audio mode or devices.
+ */
+interface RtcClient : VoiceTransport {
+    /** Joins the room at [url] with a [token]; returns once connected or throws. */
+    suspend fun connect(url: String, token: String)
 }

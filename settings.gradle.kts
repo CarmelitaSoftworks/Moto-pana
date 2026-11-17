@@ -24,6 +24,7 @@ rootProject.name = "moto-intercom"
 include(":app")
 include(":core:audio")
 include(":core:rtc")
+include(":core:nearby")
 include(":core:service")
 include(":core:ui")
 include(":feature:group")

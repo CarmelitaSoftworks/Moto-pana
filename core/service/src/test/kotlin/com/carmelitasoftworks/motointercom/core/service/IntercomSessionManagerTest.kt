@@ -4,6 +4,8 @@ import com.carmelitasoftworks.motointercom.core.audio.AudioRoute
 import com.carmelitasoftworks.motointercom.core.audio.AudioRouter
 import com.carmelitasoftworks.motointercom.core.audio.SoundSettings
 import com.carmelitasoftworks.motointercom.core.audio.SoundSettingsRepository
+import com.carmelitasoftworks.motointercom.core.nearby.NearbyGroup
+import com.carmelitasoftworks.motointercom.core.nearby.NearbyIntercom
 import com.carmelitasoftworks.motointercom.core.rtc.ConnectionDetails
 import com.carmelitasoftworks.motointercom.core.rtc.RoomState
 import com.carmelitasoftworks.motointercom.core.rtc.RtcClient
@@ -26,9 +28,10 @@ import org.junit.jupiter.api.Test
 class IntercomSessionManagerTest {
     private val rtc = FakeRtcClient()
     private val router = FakeAudioRouter()
+    private val nearby = FakeNearby()
 
     private fun TestScope.manager(tokens: TokenProvider = TokenProvider { _, _ -> DETAILS }) =
-        IntercomSessionManager(tokens, rtc, router, FakeSoundSettings(), backgroundScope)
+        IntercomSessionManager(tokens, rtc, nearby, router, FakeSoundSettings(), backgroundScope)
 
     private val IntercomSessionManager.active: IntercomSession.Active
         get() = session.value as IntercomSession.Active
@@ -101,6 +104,32 @@ class IntercomSessionManagerTest {
     }
 
     @Test
+    fun `hosting a nearby group uses the radio, not the internet`() = runTest(UnconfinedTestDispatcher()) {
+        val manager = manager(tokens = { _, _ -> error("no internet in nearby mode") })
+
+        manager.hostNearby("Ana")
+
+        assertEquals(IntercomMode.NEARBY, manager.active.mode)
+        assertTrue(manager.active.nearbyHost)
+        assertEquals(manager.active.code, nearby.hostedGroup)
+        assertTrue(manager.active.transmitting)
+        assertEquals(RtcConnectionState.DISCONNECTED, rtc.state.value.connection)
+    }
+
+    @Test
+    fun `joining a nearby group and leaving it`() = runTest(UnconfinedTestDispatcher()) {
+        val manager = manager()
+        manager.joinNearby(NearbyGroup(endpointId = "e1", groupId = "XYZ789", hostName = "Luis"), "Ana")
+
+        assertEquals("XYZ789", manager.active.code)
+        assertFalse(manager.active.nearbyHost)
+
+        manager.leave()
+        assertEquals(IntercomSession.Idle, manager.session.value)
+        assertEquals(RtcConnectionState.DISCONNECTED, nearby.state.value.connection)
+    }
+
+    @Test
     fun `leaving closes everything`() = runTest(UnconfinedTestDispatcher()) {
         val manager = manager()
         manager.join("ABC234", "Ana")
@@ -139,6 +168,37 @@ private class FakeRtcClient : RtcClient {
     }
 
     fun drop() {
+        state.value = RoomState()
+    }
+}
+
+private class FakeNearby : NearbyIntercom {
+    override val state = MutableStateFlow(RoomState())
+    override val groups = MutableStateFlow<List<NearbyGroup>>(emptyList())
+    var hostedGroup: String? = null
+
+    override fun startDiscovery() = Unit
+
+    override fun stopDiscovery() = Unit
+
+    override fun host(groupId: String, myName: String) {
+        hostedGroup = groupId
+        state.value = RoomState(connection = RtcConnectionState.CONNECTED)
+    }
+
+    override fun join(group: NearbyGroup, myName: String) {
+        state.value = RoomState(connection = RtcConnectionState.CONNECTED)
+    }
+
+    override suspend fun setMicrophoneEnabled(enabled: Boolean) {
+        state.update { it.copy(microphoneOn = enabled) }
+    }
+
+    override fun setRiderMuted(riderId: String, muted: Boolean) = Unit
+
+    override fun setPlaybackGain(gain: Double) = Unit
+
+    override fun disconnect() {
         state.value = RoomState()
     }
 }

@@ -10,6 +10,7 @@ android {
 dependencies {
     api(project(":core:audio"))
     api(project(":core:rtc"))
+    api(project(":core:nearby"))
 
     implementation(libs.androidx.annotation)
     implementation(libs.kotlinx.coroutines.android)

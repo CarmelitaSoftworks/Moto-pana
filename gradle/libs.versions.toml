@@ -15,6 +15,7 @@ lifecycle = "2.8.7"
 hiltNavigationCompose = "1.2.0"
 annotation = "1.9.1"
 livekit = "2.20.0"
+playServicesNearby = "19.3.0"
 kotlinxSerialization = "1.8.1"
 junit = "5.12.2"
 mockk = "1.14.0"
@@ -43,6 +44,7 @@ hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hil
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
+play-services-nearby = { module = "com.google.android.gms:play-services-nearby", version.ref = "playServicesNearby" }
 livekit-android = { module = "io.livekit:livekit-android", version.ref = "livekit" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 

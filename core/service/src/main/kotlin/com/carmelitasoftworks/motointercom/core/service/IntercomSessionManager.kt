@@ -2,42 +2,55 @@ package com.carmelitasoftworks.motointercom.core.service
 
 import com.carmelitasoftworks.motointercom.core.audio.AudioRouter
 import com.carmelitasoftworks.motointercom.core.audio.SoundSettingsRepository
+import com.carmelitasoftworks.motointercom.core.nearby.NearbyGroup
+import com.carmelitasoftworks.motointercom.core.nearby.NearbyIntercom
 import com.carmelitasoftworks.motointercom.core.rtc.RiderName
 import com.carmelitasoftworks.motointercom.core.rtc.RtcClient
 import com.carmelitasoftworks.motointercom.core.rtc.RtcConnectionState
 import com.carmelitasoftworks.motointercom.core.rtc.TokenException
 import com.carmelitasoftworks.motointercom.core.rtc.TokenProvider
+import com.carmelitasoftworks.motointercom.core.rtc.VoiceTransport
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.pow
 import kotlin.random.Random
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Owns one ride: token, room, audio route and talk mode. Lives as long as the
- * app process; [IntercomService] keeps that process alive in the background.
+ * Owns one ride: transport (internet room or nearby radio), audio route and talk
+ * mode. Lives as long as the app process; [IntercomService] keeps that process
+ * alive in the background.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
 class IntercomSessionManager @Inject constructor(
     private val tokenProvider: TokenProvider,
     private val rtcClient: RtcClient,
+    private val nearby: NearbyIntercom,
     private val audioRouter: AudioRouter,
     private val soundSettings: SoundSettingsRepository,
     @SessionScope private val scope: CoroutineScope,
 ) {
     private data class Control(
         val code: String? = null,
+        val mode: IntercomMode = IntercomMode.ONLINE,
+        /** NEARBY: this phone hosts the group (and relays everyone's voice). */
+        val nearbyHost: Boolean = false,
         val error: JoinError? = null,
         val talkMode: TalkMode = TalkMode.OPEN,
         val selfMuted: Boolean = false,
@@ -53,11 +66,21 @@ class IntercomSessionManager @Inject constructor(
     private var joinJob: Job? = null
     private var soundJob: Job? = null
 
+    private val transport: VoiceTransport
+        get() = if (control.value.mode == IntercomMode.NEARBY) nearby else rtcClient
+
+    private val transportState = control
+        .map { it.mode }
+        .distinctUntilChanged()
+        .flatMapLatest { mode -> if (mode == IntercomMode.NEARBY) nearby.state else rtcClient.state }
+
     val session: StateFlow<IntercomSession> =
-        combine(control, rtcClient.state, audioRouter.route) { control, room, route ->
+        combine(control, transportState, audioRouter.route) { control, room, route ->
             when {
                 control.code != null -> IntercomSession.Active(
                     code = control.code,
+                    mode = control.mode,
+                    nearbyHost = control.nearbyHost,
                     connection = when {
                         room.connection != RtcConnectionState.DISCONNECTED -> room.connection
                         control.everConnected -> RtcConnectionState.RECONNECTING
@@ -75,15 +98,34 @@ class IntercomSessionManager @Inject constructor(
             }
         }.stateIn(scope, SharingStarted.Eagerly, IntercomSession.Idle)
 
-    /** Joins (or creates: rooms are created on first join) the group [code]. Main thread. */
+    /** Joins (or creates: rooms are created on first join) the internet group [code]. Main thread. */
     fun join(code: String, displayName: String) {
+        begin(Control(code = code))
+        joinJob = scope.launch { stayConnected(code, displayName) }
+    }
+
+    /** Starts a group without internet, hosted by this phone. Main thread. */
+    fun hostNearby(displayName: String) {
+        val code = GroupCode.generate()
+        begin(Control(code = code, mode = IntercomMode.NEARBY, nearbyHost = true))
+        nearby.host(code, displayName)
+        scope.launch { applyMic() }
+    }
+
+    /** Joins a group without internet that someone nearby is hosting. Main thread. */
+    fun joinNearby(group: NearbyGroup, displayName: String) {
+        begin(Control(code = group.groupId, mode = IntercomMode.NEARBY))
+        nearby.join(group, displayName)
+        scope.launch { applyMic() }
+    }
+
+    private fun begin(initial: Control) {
         leave()
-        control.value = Control(code = code)
+        control.value = initial
         audioRouter.start()
         soundJob = scope.launch {
-            soundSettings.settings.collect { rtcClient.setPlaybackGain(dbToGain(it.boostDb)) }
+            soundSettings.settings.collect { transport.setPlaybackGain(dbToGain(it.boostDb)) }
         }
-        joinJob = scope.launch { stayConnected(code, displayName) }
     }
 
     /**
@@ -126,7 +168,7 @@ class IntercomSessionManager @Inject constructor(
         joinJob = null
         soundJob?.cancel()
         soundJob = null
-        rtcClient.disconnect()
+        transport.disconnect()
         audioRouter.stop()
         control.value = Control()
     }
@@ -142,7 +184,7 @@ class IntercomSessionManager @Inject constructor(
 
     fun setPushToTalkHeld(held: Boolean) = updateMic { it.copy(pttHeld = held) }
 
-    fun setRiderMuted(riderId: String, muted: Boolean) = rtcClient.setRiderMuted(riderId, muted)
+    fun setRiderMuted(riderId: String, muted: Boolean) = transport.setRiderMuted(riderId, muted)
 
     private fun updateMic(transform: (Control) -> Control) {
         if (control.value.code == null) return
@@ -151,10 +193,13 @@ class IntercomSessionManager @Inject constructor(
     }
 
     private suspend fun applyMic() {
-        if (rtcClient.state.value.connection == RtcConnectionState.DISCONNECTED) return
+        val current = transport
+        // The internet room can only publish once connected; nearby takes the flag at any time.
+        val online = control.value.mode == IntercomMode.ONLINE
+        if (online && current.state.value.connection == RtcConnectionState.DISCONNECTED) return
         val wanted = control.value.wantsMic
-        if (rtcClient.state.value.microphoneOn != wanted) {
-            runCatching { rtcClient.setMicrophoneEnabled(wanted) }
+        if (current.state.value.microphoneOn != wanted) {
+            runCatching { current.setMicrophoneEnabled(wanted) }
         }
     }
 
