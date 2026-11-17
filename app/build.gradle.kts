@@ -3,13 +3,21 @@ plugins {
     id("motointercom.hilt")
 }
 
+val appVersionCode = 3
+val appVersionName = "0.3.0"
+
+// APKs come out as MotoIntercom-<version>-<buildType>.apk, e.g. MotoIntercom-0.3.0-debug.apk.
+base {
+    archivesName.set("MotoIntercom-$appVersionName")
+}
+
 android {
     namespace = "com.carmelitasoftworks.motointercom"
 
     defaultConfig {
         applicationId = "com.carmelitasoftworks.motointercom"
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         ndk {
             // Real phones only; skipping the emulator ABIs halves the APK (WebRTC is ~12 MB per ABI).
