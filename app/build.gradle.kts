@@ -8,8 +8,13 @@ android {
 
     defaultConfig {
         applicationId = "com.carmelitasoftworks.motointercom"
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
+
+        ndk {
+            // Real phones only; skipping the emulator ABIs halves the APK (WebRTC is ~12 MB per ABI).
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
     }
 
     buildTypes {

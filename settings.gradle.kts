@@ -12,6 +12,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // LiveKit depends on audioswitch, published only on JitPack.
+        maven("https://jitpack.io") {
+            content { includeGroup("com.github.davidliu") }
+        }
     }
 }
 

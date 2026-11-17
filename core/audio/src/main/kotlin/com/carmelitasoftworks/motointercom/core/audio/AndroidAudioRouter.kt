@@ -36,7 +36,10 @@ class AndroidAudioRouter @Inject constructor(@ApplicationContext context: Contex
     private val mutableRoute = MutableStateFlow(AudioRoute.NONE)
     override val route: StateFlow<AudioRoute> = mutableRoute.asStateFlow()
 
-    private var started = false
+    /** How many callers (a ride, the headset test) currently need routing. */
+    private var users = 0
+    private val started: Boolean
+        get() = users > 0
     private var modeBefore = AudioManager.MODE_NORMAL
 
     // "May duck" lets music and GPS prompts lower their volume instead of stopping.
@@ -56,8 +59,7 @@ class AndroidAudioRouter @Inject constructor(@ApplicationContext context: Contex
     }
 
     override fun start() {
-        if (started) return
-        started = true
+        if (users++ > 0) return
         modeBefore = audioManager.mode
         audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
         audioManager.requestAudioFocus(focusRequest)
@@ -67,8 +69,7 @@ class AndroidAudioRouter @Inject constructor(@ApplicationContext context: Contex
     }
 
     override fun stop() {
-        if (!started) return
-        started = false
+        if (users == 0 || --users > 0) return
         audioManager.unregisterAudioDeviceCallback(deviceCallback)
         routing.clear()
         audioManager.abandonAudioFocusRequest(focusRequest)

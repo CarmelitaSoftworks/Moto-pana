@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -51,13 +52,7 @@ fun MotoIntercomApp() {
                 TopLevelDestination.entries.forEach { destination ->
                     NavigationBarItem(
                         selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true,
-                        onClick = {
-                            navController.navigate(destination.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
+                        onClick = { navController.navigateTopLevel(destination) },
                         icon = { Icon(destination.icon, contentDescription = null) },
                         label = { Text(stringResource(destination.labelRes)) },
                     )
@@ -70,9 +65,21 @@ fun MotoIntercomApp() {
             startDestination = TopLevelDestination.GROUP.route,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(TopLevelDestination.GROUP.route) { GroupScreen() }
-            composable(TopLevelDestination.RIDE.route) { RideScreen() }
+            composable(TopLevelDestination.GROUP.route) {
+                GroupScreen(onRideStarted = { navController.navigateTopLevel(TopLevelDestination.RIDE) })
+            }
+            composable(TopLevelDestination.RIDE.route) {
+                RideScreen(onGoToGroup = { navController.navigateTopLevel(TopLevelDestination.GROUP) })
+            }
             composable(TopLevelDestination.SETTINGS.route) { SettingsScreen() }
         }
+    }
+}
+
+private fun NavHostController.navigateTopLevel(destination: TopLevelDestination) {
+    navigate(destination.route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
     }
 }

@@ -33,7 +33,8 @@ enum class AudioRoute {
  * brand. Kept behind an interface so it can be faked in tests and so
  * manufacturer quirks stay contained in the implementation (see CLAUDE.md §5.1).
  *
- * [start] and [stop] must be called from the main thread.
+ * [start] and [stop] must be called from the main thread, in pairs: routing
+ * stays on until every caller that started it has stopped it.
  */
 interface AudioRouter {
     /** The route currently in use; updates when a headset connects or drops. */

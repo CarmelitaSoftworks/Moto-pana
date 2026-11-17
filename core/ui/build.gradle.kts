@@ -6,3 +6,7 @@ plugins {
 android {
     namespace = "com.carmelitasoftworks.motointercom.core.ui"
 }
+
+dependencies {
+    implementation(libs.androidx.activity.compose)
+}

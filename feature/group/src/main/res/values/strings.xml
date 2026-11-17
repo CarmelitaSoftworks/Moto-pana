@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="group_title">Grupo</string>
-    <string name="group_placeholder">Aquí podrás crear un grupo o unirte con un código o un QR.</string>
+    <string name="group_name_label">Tu nombre</string>
+    <string name="group_name_hint">Así te verán los demás</string>
+    <string name="group_create">Crear grupo nuevo</string>
+    <string name="group_or">o únete a un grupo</string>
+    <string name="group_code_label">Código del grupo</string>
+    <string name="group_join">Unirse</string>
+    <string name="group_name_needed">Escribe tu nombre primero.</string>
+    <string name="group_code_needed">El código tiene 6 letras y números.</string>
+    <string name="group_mic_needed">Sin permiso de micrófono no puedes hablar en el intercom.</string>
+    <string name="group_in_ride">Estás en el grupo %1$s</string>
+    <string name="group_go_to_ride">Ir al viaje</string>
+    <string name="group_coverage_note">El intercom usa los datos móviles: sin cobertura no hay comunicación.</string>
+    <string name="error_server_not_configured">Esta versión de la app no tiene servidor de voz configurado.</string>
+    <string name="error_no_network">No hay conexión a internet. Revisa los datos móviles.</string>
+    <string name="error_server_rejected">El servidor de voz rechazó la conexión.</string>
+    <string name="error_connection_failed">No se pudo conectar con el servidor de voz.</string>
 </resources>

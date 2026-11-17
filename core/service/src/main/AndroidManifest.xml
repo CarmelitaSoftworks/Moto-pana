@@ -6,15 +6,16 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Lets the ride screen ask to be left out of battery optimization (CLAUDE.md §5.2). -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
-    <!--
-        IntercomService is deliberately not declared yet, so nothing can start it
-        before it calls startForeground(). Step 5 adds:
-        <service android:name=".IntercomService" android:exported="false"
-            android:foregroundServiceType="microphone|connectedDevice" />
-    -->
+    <application>
+        <service
+            android:name=".IntercomService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+    </application>
 
 </manifest>

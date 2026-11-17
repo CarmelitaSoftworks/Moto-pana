@@ -110,9 +110,9 @@ Paquete base: `com.carmelitasoftworks.motointercom`.
   diferencias entre fabricantes.
 
 ### 5.2 Servicio en segundo plano (`core/service`)
-- `IntercomService` como Foreground Service con `foregroundServiceType="microphone|connectedDevice"`.
+- `IntercomService` como Foreground Service con `foregroundServiceType="microphone"`.
 - Permisos en el manifiesto: `RECORD_AUDIO`, `BLUETOOTH_CONNECT`, `FOREGROUND_SERVICE`,
-  `FOREGROUND_SERVICE_MICROPHONE`, `FOREGROUND_SERVICE_CONNECTED_DEVICE`,
+  `FOREGROUND_SERVICE_MICROPHONE`,
   `POST_NOTIFICATIONS`, `INTERNET`, `ACCESS_NETWORK_STATE`, `WAKE_LOCK`.
 - Notificación persistente con acciones: Mute, PTT, Salir.
 - La sesión de LiveKit vive en el servicio, no en el ViewModel.

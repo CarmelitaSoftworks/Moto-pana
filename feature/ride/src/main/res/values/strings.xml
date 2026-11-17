@@ -1,5 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ride_title">Viaje</string>
-    <string name="ride_placeholder">Aquí verás quién habla y podrás silenciar o usar pulsar para hablar.</string>
+    <string name="ride_no_group">No estás en ningún grupo.</string>
+    <string name="ride_go_to_group">Crear o unirse a un grupo</string>
+    <string name="ride_failed">No se pudo entrar al grupo.</string>
+    <string name="ride_code">Grupo %1$s</string>
+    <string name="ride_share">Compartir código</string>
+    <string name="ride_share_text">Únete a mi grupo de intercom con el código %1$s</string>
+    <string name="status_connecting">Conectando…</string>
+    <string name="status_connected">Conectado</string>
+    <string name="status_reconnecting">Sin conexión. Reconectando…</string>
+    <string name="route_label">Audio: %1$s</string>
+    <string name="route_none">preparando…</string>
+    <string name="route_bluetooth_sco">auriculares Bluetooth</string>
+    <string name="route_bluetooth_le">auriculares Bluetooth (LE Audio)</string>
+    <string name="route_wired_headset">auriculares con cable</string>
+    <string name="route_speaker">altavoz del teléfono (sin auriculares)</string>
+    <string name="mic_on">Micrófono activo · toca para silenciar</string>
+    <string name="mic_off">Micrófono silenciado · toca para hablar</string>
+    <string name="mode_open">Manos libres</string>
+    <string name="mode_ptt">Pulsar para hablar</string>
+    <string name="ptt_hold">Mantén pulsado para hablar</string>
+    <string name="ptt_talking">Hablando…</string>
+    <string name="riders_title">En el grupo</string>
+    <string name="riders_empty">Aún no hay nadie más. Comparte el código.</string>
+    <string name="rider_speaking">hablando</string>
+    <string name="rider_muted">silenciado</string>
+    <string name="rider_mute">Silenciar a %1$s</string>
+    <string name="rider_unmute">Volver a oír a %1$s</string>
+    <string name="you_speaking">Tú estás hablando</string>
+    <string name="battery_title">Evita que el teléfono corte el intercom</string>
+    <string name="battery_text">Con la pantalla apagada, algunos teléfonos (Vivo, Xiaomi, Samsung…) cierran las apps para ahorrar batería. Permite que esta app siga funcionando.</string>
+    <string name="battery_button">Permitir</string>
+    <string name="ride_leave">Salir del grupo</string>
 </resources>

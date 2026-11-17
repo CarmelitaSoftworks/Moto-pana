@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_channel">Intercom activo</string>
+    <string name="notification_title">Intercom · grupo %1$s</string>
+    <string name="notification_connecting">Conectando…</string>
+    <string name="notification_reconnecting">Sin conexión. Reconectando…</string>
+    <plurals name="notification_riders">
+        <item quantity="one">%d piloto más en el grupo</item>
+        <item quantity="other">%d pilotos más en el grupo</item>
+    </plurals>
+    <string name="notification_muted">Micrófono silenciado</string>
+    <string name="action_mute">Silenciar</string>
+    <string name="action_unmute">Activar micro</string>
+    <string name="action_leave">Salir</string>
+    <string name="announce_lost">Conexión perdida</string>
+    <string name="announce_back">Reconectado</string>
+</resources>

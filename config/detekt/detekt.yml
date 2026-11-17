@@ -8,6 +8,9 @@ naming:
 complexity:
   LongParameterList:
     ignoreAnnotated: ['Composable']
+  TooManyFunctions:
+    # Android services and session owners naturally carry a few more small methods.
+    thresholdInClasses: 15
   LongMethod:
     ignoreAnnotated: ['Composable']
 
