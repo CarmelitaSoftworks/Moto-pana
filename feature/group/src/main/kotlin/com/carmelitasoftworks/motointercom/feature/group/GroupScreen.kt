@@ -67,6 +67,7 @@ fun GroupScreen(onRideStarted: () -> Unit, modifier: Modifier = Modifier, viewMo
     val session by viewModel.session.collectAsStateWithLifecycle()
     val name by viewModel.name.collectAsStateWithLifecycle()
     val nearbyGroups by viewModel.nearbyGroups.collectAsStateWithLifecycle()
+    val nearbyError by viewModel.nearbyError.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     var mode by rememberSaveable { mutableStateOf(GroupMode.ONLINE) }
@@ -150,9 +151,11 @@ fun GroupScreen(onRideStarted: () -> Unit, modifier: Modifier = Modifier, viewMo
                 NearbySection(
                     permissionsGranted = nearbyGranted,
                     groups = nearbyGroups,
+                    error = nearbyError,
                     onGrant = requestNearby,
                     onCreate = { start(PendingStart.HostNearby) },
                     onJoin = { start(PendingStart.JoinNearby(it)) },
+                    onRetry = viewModel::retryNearbyDiscovery,
                 )
             },
             modifier = modifier,

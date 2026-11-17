@@ -55,6 +55,9 @@ class GmsNearbyIntercom @Inject constructor(
     private val mutableGroups = MutableStateFlow<List<NearbyGroup>>(emptyList())
     override val groups: StateFlow<List<NearbyGroup>> = mutableGroups.asStateFlow()
 
+    private val mutableError = MutableStateFlow<NearbyError?>(null)
+    override val error: StateFlow<NearbyError?> = mutableError.asStateFlow()
+
     private enum class Role { NONE, HOST, CLIENT }
 
     @Volatile private var role = Role.NONE
@@ -87,7 +90,19 @@ class GmsNearbyIntercom @Inject constructor(
         discovering = true
         val options = DiscoveryOptions.Builder().setStrategy(STRATEGY).build()
         client.startDiscovery(SERVICE_ID, discoveryCallback, options)
-            .addOnFailureListener { discovering = false }
+            .addOnSuccessListener { mutableError.value = null }
+            .addOnFailureListener {
+                discovering = false
+                mutableError.value = NearbyError.from(it)
+            }
+    }
+
+    override fun restartDiscovery() {
+        if (discovering) {
+            discovering = false
+            client.stopDiscovery()
+        }
+        startDiscovery()
     }
 
     override fun stopDiscovery() {
@@ -103,8 +118,14 @@ class GmsNearbyIntercom @Inject constructor(
         this.myName = myName
         val options = AdvertisingOptions.Builder().setStrategy(STRATEGY).build()
         client.startAdvertising(EndpointName.group(groupId, myName), SERVICE_ID, connectionCallback, options)
-            .addOnSuccessListener { mutableState.update { it.copy(connection = RtcConnectionState.CONNECTED) } }
-            .addOnFailureListener { mutableState.update { it.copy(connection = RtcConnectionState.DISCONNECTED) } }
+            .addOnSuccessListener {
+                mutableError.value = null
+                mutableState.update { it.copy(connection = RtcConnectionState.CONNECTED) }
+            }
+            .addOnFailureListener { failure ->
+                mutableError.value = NearbyError.from(failure)
+                mutableState.update { it.copy(connection = RtcConnectionState.DISCONNECTED) }
+            }
         startAudio(RtcConnectionState.CONNECTING)
     }
 
@@ -146,6 +167,7 @@ class GmsNearbyIntercom @Inject constructor(
         roster = emptyList()
         mutedRiders.clear()
         lastHeard.clear()
+        mutableError.value = null
         mutableState.value = RoomState()
     }
 
@@ -163,7 +185,10 @@ class GmsNearbyIntercom @Inject constructor(
 
     private fun requestConnection(endpointId: String) {
         client.requestConnection(EndpointName.rider(myName), endpointId, connectionCallback)
-            .addOnFailureListener { lookForHostAgain() }
+            .addOnFailureListener {
+                mutableError.value = NearbyError.from(it)
+                lookForHostAgain()
+            }
     }
 
     /** CLIENT: the host went out of range (or refused); wait for it to show up again. */
@@ -259,6 +284,7 @@ class GmsNearbyIntercom @Inject constructor(
                     }
                 }
                 Role.CLIENT -> if (ok) {
+                    mutableError.value = null
                     hostEndpoint = endpointId
                     // Discovery competes with the link for the radio; stop it while connected.
                     stopDiscovery()

@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carmelitasoftworks.motointercom.core.audio.AudioRoute
+import com.carmelitasoftworks.motointercom.core.nearby.NearbyError
 import com.carmelitasoftworks.motointercom.core.rtc.RemoteRider
 import com.carmelitasoftworks.motointercom.core.rtc.RtcConnectionState
 import com.carmelitasoftworks.motointercom.core.service.IntercomMode
@@ -57,10 +58,12 @@ import com.carmelitasoftworks.motointercom.core.ui.theme.MotoIntercomTheme
 @Composable
 fun RideScreen(onGoToGroup: () -> Unit, modifier: Modifier = Modifier, viewModel: RideViewModel = hiltViewModel()) {
     val session by viewModel.session.collectAsStateWithLifecycle()
+    val nearbyError by viewModel.nearbyError.collectAsStateWithLifecycle()
     val context = LocalContext.current
     when (val current = session) {
         is IntercomSession.Active -> ActiveRide(
             session = current,
+            nearbyError = nearbyError.takeIf { current.mode == IntercomMode.NEARBY },
             actions = RideActions(
                 onSelfMuted = viewModel::setSelfMuted,
                 onTalkMode = viewModel::setTalkMode,
@@ -108,7 +111,12 @@ private fun NoRide(@StringRes message: Int, onGoToGroup: () -> Unit, modifier: M
 }
 
 @Composable
-private fun ActiveRide(session: IntercomSession.Active, actions: RideActions, modifier: Modifier = Modifier) {
+private fun ActiveRide(
+    session: IntercomSession.Active,
+    nearbyError: NearbyError?,
+    actions: RideActions,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -117,6 +125,13 @@ private fun ActiveRide(session: IntercomSession.Active, actions: RideActions, mo
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Header(session = session, onShare = actions.onShare)
+        if (nearbyError != null) {
+            Text(
+                text = stringResource(nearbyError.messageRes, nearbyError.statusCode),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
         BatteryCard()
         when (session.talkMode) {
             TalkMode.OPEN -> MuteButton(
@@ -362,6 +377,7 @@ private fun ActiveRidePreview() {
                     RemoteRider(id = "2", name = "Luis", speaking = false, mutedByMe = true),
                 ),
             ),
+            nearbyError = null,
             actions = RideActions({}, {}, {}, { _, _ -> }, {}, {}),
         )
     }

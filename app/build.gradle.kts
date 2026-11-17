@@ -3,8 +3,8 @@ plugins {
     id("motointercom.hilt")
 }
 
-val appVersionCode = 3
-val appVersionName = "0.3.0"
+val appVersionCode = 4
+val appVersionName = "0.3.1"
 
 // APKs come out as MotoIntercom-<version>-<buildType>.apk, e.g. MotoIntercom-0.3.0-debug.apk.
 base {

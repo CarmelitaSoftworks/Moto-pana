@@ -25,11 +25,10 @@ val nearbyPermissions: List<String> = buildList {
         add(Manifest.permission.BLUETOOTH_ADVERTISE)
         add(Manifest.permission.BLUETOOTH_CONNECT)
     }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        add(Manifest.permission.NEARBY_WIFI_DEVICES)
-    } else {
-        add(Manifest.permission.ACCESS_FINE_LOCATION)
-    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add(Manifest.permission.NEARBY_WIFI_DEVICES)
+    // Nearby's discovery still needs location permission on many phones, whatever the version.
+    add(Manifest.permission.ACCESS_COARSE_LOCATION)
+    add(Manifest.permission.ACCESS_FINE_LOCATION)
 }
 
 fun hasPermissions(context: Context, permissions: List<String>): Boolean =

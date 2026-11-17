@@ -21,8 +21,14 @@ interface NearbyIntercom : VoiceTransport {
     /** Groups currently visible while [startDiscovery] runs. */
     val groups: StateFlow<List<NearbyGroup>>
 
+    /** The last thing that went wrong with the radios; cleared when it next works. */
+    val error: StateFlow<NearbyError?>
+
     /** Starts looking for nearby groups. Needs the nearby-devices permissions. */
     fun startDiscovery()
+
+    /** Stops and starts discovery again, e.g. after the rider turned Bluetooth or location on. */
+    fun restartDiscovery()
 
     fun stopDiscovery()
 

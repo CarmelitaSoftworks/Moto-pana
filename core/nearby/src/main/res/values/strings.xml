@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nearby_error_location_off">Activa la ubicación (GPS) del teléfono: sin ella no se encuentran los teléfonos cercanos.</string>
+    <string name="nearby_error_radio">Bluetooth o Wi-Fi apagado o con fallos. Actívalos (no hace falta conectarse a nada).</string>
+    <string name="nearby_error_permission">Falta un permiso de dispositivos cercanos o de ubicación. Dalo en Ajustes de Android → Aplicaciones → Moto Intercom → Permisos.</string>
+    <string name="nearby_error_busy">Otra app está usando la conexión entre teléfonos. Ciérrala o reinicia el teléfono.</string>
+    <string name="nearby_error_other">Error de conexión entre teléfonos (código %1$d).</string>
+</resources>

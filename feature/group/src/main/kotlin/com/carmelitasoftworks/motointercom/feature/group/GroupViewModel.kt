@@ -1,6 +1,7 @@
 package com.carmelitasoftworks.motointercom.feature.group
 
 import androidx.lifecycle.ViewModel
+import com.carmelitasoftworks.motointercom.core.nearby.NearbyError
 import com.carmelitasoftworks.motointercom.core.nearby.NearbyGroup
 import com.carmelitasoftworks.motointercom.core.nearby.NearbyIntercom
 import com.carmelitasoftworks.motointercom.core.service.GroupCode
@@ -20,6 +21,7 @@ class GroupViewModel @Inject constructor(
     val session: StateFlow<IntercomSession> = manager.session
     val name: StateFlow<String> = profile.name
     val nearbyGroups: StateFlow<List<NearbyGroup>> = nearby.groups
+    val nearbyError: StateFlow<NearbyError?> = nearby.error
 
     fun setName(name: String) = profile.setName(name)
 
@@ -33,6 +35,8 @@ class GroupViewModel @Inject constructor(
     fun startNearbyDiscovery() = nearby.startDiscovery()
 
     fun stopNearbyDiscovery() = nearby.stopDiscovery()
+
+    fun retryNearbyDiscovery() = nearby.restartDiscovery()
 
     /** Hosts a group without internet; needs the microphone and nearby permissions. */
     fun hostNearby() {

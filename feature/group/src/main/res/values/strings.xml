@@ -22,7 +22,13 @@
     <string name="nearby_join">Unirse al grupo de %1$s</string>
     <string name="nearby_permissions_needed">Para el modo sin internet hace falta el permiso de dispositivos cercanos.</string>
     <string name="nearby_grant">Dar permiso</string>
-    <string name="nearby_location_hint">En este Android, la búsqueda necesita la ubicación del teléfono activada.</string>
+    <string name="check_bluetooth">Bluetooth apagado</string>
+    <string name="check_wifi">Wi-Fi apagado (no hace falta conectarse a ninguna red)</string>
+    <string name="check_location">Ubicación (GPS) apagada</string>
+    <string name="check_open">Activar</string>
+    <string name="checks_intro">Para encontrar a los demás, en todos los teléfonos del grupo:</string>
+    <string name="nearby_retry">Buscar de nuevo</string>
+    <string name="nearby_no_pairing">No hace falta emparejar los teléfonos: se encuentran solos estando a pocos metros.</string>
     <string name="error_server_not_configured">Esta versión de la app no tiene servidor de voz configurado.</string>
     <string name="error_no_network">No hay conexión a internet. Revisa los datos móviles.</string>
     <string name="error_server_rejected">El servidor de voz rechazó la conexión.</string>

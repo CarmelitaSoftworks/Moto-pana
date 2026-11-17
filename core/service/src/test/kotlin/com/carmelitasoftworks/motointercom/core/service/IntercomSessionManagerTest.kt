@@ -4,6 +4,7 @@ import com.carmelitasoftworks.motointercom.core.audio.AudioRoute
 import com.carmelitasoftworks.motointercom.core.audio.AudioRouter
 import com.carmelitasoftworks.motointercom.core.audio.SoundSettings
 import com.carmelitasoftworks.motointercom.core.audio.SoundSettingsRepository
+import com.carmelitasoftworks.motointercom.core.nearby.NearbyError
 import com.carmelitasoftworks.motointercom.core.nearby.NearbyGroup
 import com.carmelitasoftworks.motointercom.core.nearby.NearbyIntercom
 import com.carmelitasoftworks.motointercom.core.rtc.ConnectionDetails
@@ -175,9 +176,12 @@ private class FakeRtcClient : RtcClient {
 private class FakeNearby : NearbyIntercom {
     override val state = MutableStateFlow(RoomState())
     override val groups = MutableStateFlow<List<NearbyGroup>>(emptyList())
+    override val error = MutableStateFlow<NearbyError?>(null)
     var hostedGroup: String? = null
 
     override fun startDiscovery() = Unit
+
+    override fun restartDiscovery() = Unit
 
     override fun stopDiscovery() = Unit
 
